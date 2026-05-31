@@ -1,12 +1,15 @@
-import type { availabilityRules, bookings, calendarProfile } from "../../database/schema";
-import { toPublicProfile } from "../public/mappers";
+import type { availabilityRules, bookings, calendarProfile, eventTypes } from "../../database/schema";
+import { toEventType, toPublicProfile } from "../public/mappers";
 
 type BookingRow = typeof bookings.$inferSelect;
+type EventTypeRow = typeof eventTypes.$inferSelect;
 type AvailabilityRuleRow = typeof availabilityRules.$inferSelect;
 type ProfileRow = typeof calendarProfile.$inferSelect;
 
-export const toAdminBooking = (booking: BookingRow) => ({
+export const toAdminBooking = (booking: BookingRow, eventType: EventTypeRow) => ({
   id: booking.id,
+  eventTypeId: eventType.id,
+  eventType: toEventType(eventType),
   guestName: booking.guestName,
   guestEmail: booking.guestEmail,
   guestNotes: booking.guestNotes,

@@ -45,7 +45,7 @@ export const AdminBookingsPage = () => {
             <article className="table-row" key={booking.id}>
               <div>
                 <strong>{booking.guestName}</strong>
-                <span>{booking.guestEmail}</span>
+                <span>{booking.guestEmail} · {booking.eventType.title}</span>
               </div>
               <div>{formatDateTime(booking.startAt)}</div>
               <span className={booking.status === "cancelled" ? "status-pill muted-pill" : "status-pill"}>{booking.status}</span>

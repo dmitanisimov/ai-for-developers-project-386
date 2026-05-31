@@ -14,7 +14,7 @@ permission:
 
 - держать production `docker-compose.yml` без `ports`;
 - держать локальные browser checks в `docker-compose.dev.yml` с bind только на `127.0.0.1`;
-- держать приложение на `0.0.0.0:3000` внутри контейнера;
+- держать приложение на `0.0.0.0:${PORT:-3000}` внутри контейнера;
 - сохранять service/container name `cal-booking-app`;
 - не использовать external Docker networks без явного разрешения;
 - сохранять healthcheck behavior;

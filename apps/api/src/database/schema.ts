@@ -32,6 +32,15 @@ export const calendarProfile = sqliteTable("calendar_profile", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const eventTypes = sqliteTable("event_types", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  durationMinutes: integer("duration_minutes").notNull(),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export const availabilityRules = sqliteTable("availability_rules", {
   id: text("id").primaryKey(),
   weekday: integer("weekday").notNull().unique(),
@@ -43,6 +52,7 @@ export const availabilityRules = sqliteTable("availability_rules", {
 
 export const bookings = sqliteTable("bookings", {
   id: text("id").primaryKey(),
+  eventTypeId: text("event_type_id"),
   guestName: text("guest_name").notNull(),
   guestEmail: text("guest_email").notNull(),
   guestNotes: text("guest_notes"),

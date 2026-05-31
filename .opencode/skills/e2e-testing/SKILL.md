@@ -10,7 +10,7 @@ description: Использовать при добавлении или review 
 ## Critical Scenarios
 
 - Visitor открывает booking page.
-- Visitor выбирает 15- или 30-minute meeting category.
+- Visitor выбирает тип события из API.
 - Visitor выбирает дату и доступный slot.
 - Visitor отправляет name, email и notes.
 - Booking success page показывает выбранную встречу.

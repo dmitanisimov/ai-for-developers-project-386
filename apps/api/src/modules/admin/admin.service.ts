@@ -2,8 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 import { notFound, validationError } from "../../common/http-errors";
 import { DatabaseService } from "../../database/database.service";
-import { availabilityRules, bookings, calendarProfile } from "../../database/schema";
+import { availabilityRules, bookings, calendarProfile, eventTypes } from "../../database/schema";
 import { toAdminAvailability, toAdminBooking, toAdminProfile } from "./mappers";
+import { toEventType } from "../public/mappers";
+import type { CreateEventTypeDto } from "./dto/create-event-type.dto";
 import type { ListBookingsQuery } from "./dto/list-bookings.query";
 import type { UpdateAvailabilityDto } from "./dto/update-availability.dto";
 import type { UpdateProfileDto } from "./dto/update-profile.dto";
@@ -28,7 +30,50 @@ export class AdminService {
   constructor(@Inject(DatabaseService) private readonly database: DatabaseService) {}
 
   getBookings(status: ListBookingsQuery["status"] = "upcoming") {
-    return { bookings: getFilteredBookings(this.database, status).map(toAdminBooking) };
+    const eventTypeRows = this.database.db.select().from(eventTypes).all();
+    const defaultEventType = eventTypeRows[0];
+    const eventTypesById = new Map(eventTypeRows.map((eventType) => [eventType.id, eventType]));
+
+    return {
+      bookings: getFilteredBookings(this.database, status)
+        .map((booking) => {
+          const durationMinutes = Math.round((Date.parse(booking.endAt) - Date.parse(booking.startAt)) / 60_000);
+          const eventType = eventTypesById.get(booking.eventTypeId || "") || eventTypeRows.find((row) => row.durationMinutes === durationMinutes) || defaultEventType;
+          return eventType ? toAdminBooking(booking, eventType) : null;
+        })
+        .filter((booking) => booking !== null),
+    };
+  }
+
+  getEventTypes() {
+    return { eventTypes: this.database.db.select().from(eventTypes).all().sort((left, right) => left.durationMinutes - right.durationMinutes || left.title.localeCompare(right.title)).map(toEventType) };
+  }
+
+  createEventType(dto: CreateEventTypeDto) {
+    const now = new Date().toISOString();
+
+    try {
+      this.database.db
+        .insert(eventTypes)
+        .values({
+          id: dto.id.trim(),
+          title: dto.title.trim(),
+          description: dto.description.trim(),
+          durationMinutes: dto.durationMinutes,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .run();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("UNIQUE")) {
+        throw validationError();
+      }
+
+      throw error;
+    }
+
+    const eventType = this.database.db.select().from(eventTypes).where(eq(eventTypes.id, dto.id.trim())).get();
+    return { eventType: toEventType(eventType!) };
   }
 
   cancelBooking(id: string) {

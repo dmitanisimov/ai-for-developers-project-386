@@ -1,6 +1,7 @@
 import { BookingPage } from "./features/booking/BookingPage";
 import { AdminAvailabilityPage } from "./pages/AdminAvailabilityPage";
 import { AdminBookingsPage } from "./pages/AdminBookingsPage";
+import { AdminEventTypesPage } from "./pages/AdminEventTypesPage";
 import { AdminProfilePage } from "./pages/AdminProfilePage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -17,6 +18,7 @@ export const App = () => {
   if (path === "/login") return <LoginPage />;
   if (path === "/book") return <BookingPage />;
   if (path === "/admin/availability") return <AdminAvailabilityPage />;
+  if (path === "/admin/event-types") return <AdminEventTypesPage />;
   if (path === "/admin/profile") return <AdminProfilePage />;
   if (path === "/admin") return <AdminBookingsPage />;
   return <HomePage />;

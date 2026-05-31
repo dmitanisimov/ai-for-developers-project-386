@@ -11,7 +11,7 @@ Cal Booking — компактное учебное приложение для 
 - одна публичная страница записи;
 - один владелец календаря;
 - один публичный booking flow;
-- категории встречи на 15 и 30 минут;
+- типы событий, управляемые владельцем календаря;
 - вход администратора по email и паролю;
 - список встреч в админке;
 - настройки доступности;
@@ -26,7 +26,6 @@ Cal Booking — компактное учебное приложение для 
 - публичная регистрация;
 - платежи;
 - команды;
-- несколько типов встреч;
 - email-доставка;
 - ссылки для самостоятельного переноса встречи гостем.
 
@@ -48,7 +47,7 @@ Production-контейнер остается один: NestJS отдает и 
 
 ```txt
 Browser / reverse proxy
-  -> cal-booking-app:3000
+  -> cal-booking-app:${PORT:-3000}
     -> NestJS API
     -> static React build
     -> SQLite database file
@@ -57,12 +56,12 @@ Browser / reverse proxy
 Production Compose:
 
 - service name: `cal-booking-app`;
-- internal port: `3000`;
+- internal port: `${PORT:-3000}`;
 - host-порты не публикуются;
 - health endpoint: `/api/health`;
 - внешний reverse proxy может быть настроен отдельно, если нужен публичный доступ.
 
-Для dev-проверки в браузере используется `docker-compose.dev.yml`, который bind-ит только `127.0.0.1:3000:3000`.
+Для dev-проверки в браузере используется `docker-compose.dev.yml`, который bind-ит только `127.0.0.1:${PORT:-3000}:${PORT:-3000}`.
 
 ## Модель Данных
 
@@ -113,9 +112,19 @@ apps/web   # React/Vite frontend
 - `endTime`
 - `updatedAt`
 
+### `event_types`
+
+- `id`
+- `title`
+- `description`
+- `durationMinutes`
+- `createdAt`
+- `updatedAt`
+
 ### `bookings`
 
 - `id`
+- `eventTypeId`
 - `guestName`
 - `guestEmail`
 - `guestNotes`
@@ -127,7 +136,9 @@ apps/web   # React/Vite frontend
 
 ## Правила Бронирования
 
-- Booking flow поддерживает длительность 15 или 30 минут.
+- Booking flow начинается с выбора `EventType`.
+- Длительность слота берется из выбранного типа события.
+- Public slots формируются только на ближайшие 14 календарных дней.
 - Сервер генерирует слоты из правил доступности.
 - Сервер исключает прошедшие слоты.
 - Сервер исключает слоты с активными confirmed bookings.

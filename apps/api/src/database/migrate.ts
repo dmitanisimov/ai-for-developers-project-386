@@ -41,8 +41,18 @@ export const migrateDatabase = ({ sqlite }: DatabaseService) => {
       updated_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS event_types (
+      id TEXT PRIMARY KEY NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      duration_minutes INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS bookings (
       id TEXT PRIMARY KEY NOT NULL,
+      event_type_id TEXT,
       guest_name TEXT NOT NULL,
       guest_email TEXT NOT NULL,
       guest_notes TEXT,
@@ -55,8 +65,17 @@ export const migrateDatabase = ({ sqlite }: DatabaseService) => {
 
     CREATE INDEX IF NOT EXISTS sessions_user_id_idx ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions(expires_at);
+    CREATE INDEX IF NOT EXISTS bookings_event_type_id_idx ON bookings(event_type_id);
     CREATE INDEX IF NOT EXISTS bookings_start_at_idx ON bookings(start_at);
     CREATE INDEX IF NOT EXISTS bookings_status_idx ON bookings(status);
     CREATE UNIQUE INDEX IF NOT EXISTS bookings_confirmed_start_at_unique ON bookings(start_at) WHERE status = 'confirmed';
   `);
+
+  const bookingColumns = sqlite.prepare("PRAGMA table_info(bookings)").all() as Array<{ name: string }>;
+  if (!bookingColumns.some((column) => column.name === "event_type_id")) {
+    sqlite.exec(`
+      ALTER TABLE bookings ADD COLUMN event_type_id TEXT;
+      CREATE INDEX IF NOT EXISTS bookings_event_type_id_idx ON bookings(event_type_id);
+    `);
+  }
 };

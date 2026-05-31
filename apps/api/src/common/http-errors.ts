@@ -11,3 +11,5 @@ export const unauthenticated = () => apiError(HttpStatus.UNAUTHORIZED, "UNAUTHEN
 export const invalidCredentials = () => apiError(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Неверный email или пароль");
 
 export const slotUnavailable = () => apiError(HttpStatus.CONFLICT, "SLOT_UNAVAILABLE", "Слот недоступен");
+
+export const slotOutOfWindow = () => apiError(HttpStatus.BAD_REQUEST, "SLOT_OUT_OF_WINDOW", "Слот вне окна записи");

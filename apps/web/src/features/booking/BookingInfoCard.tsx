@@ -1,22 +1,22 @@
 import { HostAvatar } from "../../components/HostAvatar";
-import type { Profile, Slot } from "../../api/types";
+import type { EventType, Owner, Slot } from "../../api/types";
 import { formatDateOnly, formatTime } from "../../lib/date";
 
-export const BookingInfoCard = ({ profile, selectedDate, selectedDuration, selectedSlot }: { profile: Profile | null; selectedDate: string; selectedDuration: 15 | 30; selectedSlot: Slot | null }) => (
+export const BookingInfoCard = ({ owner, selectedDate, selectedEventType, selectedSlot }: { owner: Owner | null; selectedDate: string; selectedEventType: EventType; selectedSlot: Slot | null }) => (
   <aside className="booking-info-card">
     <div className="host-row">
       <HostAvatar />
       <div>
-        <strong>{profile?.ownerName || "Tota"}</strong>
+        <strong>{owner?.ownerName || "Tota"}</strong>
         <span>Host</span>
       </div>
     </div>
 
     <div className="meeting-title-row">
-      <h2>Встреча {selectedDuration} минут</h2>
-      <span className="duration-badge">{selectedDuration} мин</span>
+      <h2>{selectedEventType.title}</h2>
+      <span className="duration-badge">{selectedEventType.durationMinutes} мин</span>
     </div>
-    <p>{selectedDuration === 15 ? "Короткий тип события для быстрого слота." : "Базовый тип события для бронирования."}</p>
+    <p>{selectedEventType.description}</p>
 
     <div className="selected-date-card">
       <span>Выбранная дата</span>

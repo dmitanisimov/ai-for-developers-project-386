@@ -29,18 +29,20 @@
 
 Проект сохраняет Design First процесс:
 
-1. `docs/api-contract.md` описывает endpoints, request/response shapes и ошибки.
-2. Frontend в `apps/web` работает по этому контракту и не вычисляет booking rules самостоятельно.
-3. Backend в `apps/api` реализует контракт, validation, auth и booking rules.
-4. Vitest/Supertest tests проверяют API behavior.
-5. Playwright e2e tests проверяют пользовательский сценарий в браузере.
-6. Dockerfile собирает frontend и backend в один runtime container.
+1. `typespec/main.tsp` описывает endpoints, request/response shapes и ошибки как canonical source of truth.
+2. `docs/openapi.yaml` генерируется из TypeSpec командой `npm run spec:emit`.
+3. Frontend в `apps/web` работает по этому контракту и не вычисляет booking rules самостоятельно.
+4. Backend в `apps/api` реализует контракт, validation, auth и booking rules.
+5. Vitest/Supertest tests проверяют API behavior.
+6. Playwright e2e tests проверяют пользовательский сценарий в браузере.
+7. Dockerfile собирает frontend и backend в один runtime container.
 
 ## Отличия От Минимального Задания
 
 - Добавлена admin-auth.
 - Добавлены настройки доступности и профиля.
-- Поддержаны meeting categories на 15 и 30 минут.
+- Поддержаны типы событий как доменная сущность `EventType`.
+- Публичное окно бронирования ограничено ближайшими 14 днями.
 - Production runtime остается одним контейнером, где NestJS отдает и API, и React build.
 
 Эти отличия не меняют основной сценарий задания: гость выбирает свободный слот и записывается на звонок, а владелец календаря видит и управляет встречами.

@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Inject, Param, Patch, Put, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Patch, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { SessionGuard } from "../auth/session.guard";
 import { AdminService } from "./admin.service";
+import { CreateEventTypeDto } from "./dto/create-event-type.dto";
 import { ListBookingsQuery } from "./dto/list-bookings.query";
 import { UpdateAvailabilityDto } from "./dto/update-availability.dto";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
@@ -13,6 +14,16 @@ export class AdminController {
   @Get("bookings")
   getBookings(@Query() query: ListBookingsQuery) {
     return this.admin.getBookings(query.status);
+  }
+
+  @Get("event-types")
+  getEventTypes() {
+    return this.admin.getEventTypes();
+  }
+
+  @Post("event-types")
+  createEventType(@Body() dto: CreateEventTypeDto) {
+    return this.admin.createEventType(dto);
   }
 
   @Patch("bookings/:id/cancel")

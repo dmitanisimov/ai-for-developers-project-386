@@ -15,7 +15,7 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: `node -e "const fs=require('fs'); for (const suffix of ['', '-shm', '-wal']) fs.rmSync('${databasePath}' + suffix, { force: true })" && npm run build && APP_PORT=${port} APP_HOST=localhost NODE_ENV=development DATABASE_URL=file:${databasePath} ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=local-dev-password SESSION_SECRET=local-dev-session-secret npm run start -w apps/api`,
+    command: `node -e "const fs=require('fs'); for (const suffix of ['', '-shm', '-wal']) fs.rmSync('${databasePath}' + suffix, { force: true })" && npm run build && PORT=${port} APP_HOST=localhost NODE_ENV=development DATABASE_URL=file:${databasePath} ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=local-dev-password SESSION_SECRET=local-dev-session-secret npm run start -w apps/api`,
     cwd: rootDir,
     reuseExistingServer: false,
     timeout: 120_000,

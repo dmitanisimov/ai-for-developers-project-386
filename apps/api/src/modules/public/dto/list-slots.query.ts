@@ -3,10 +3,12 @@ import { IsIn, IsOptional, Matches } from "class-validator";
 
 export class ListSlotsQuery {
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
-  from!: string;
+  @IsOptional()
+  from?: string;
 
   @Matches(/^\d{4}-\d{2}-\d{2}$/)
-  to!: string;
+  @IsOptional()
+  to?: string;
 
   @IsOptional()
   @Type(() => Number)

@@ -1,0 +1,364 @@
+openapi: 3.0.0
+info:
+  title: Cal Booking API
+  version: 0.0.0
+tags: []
+paths:
+  /api/admin/bookings:
+    get:
+      operationId: listAdminBookings
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - upcoming
+              - past
+              - cancelled
+              - all
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                required:
+                  - bookings
+  /api/admin/event-types:
+    get:
+      operationId: listAdminEventTypes
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTypesResponse'
+    post:
+      operationId: createAdminEventType
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedEventTypeResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventTypeRequest'
+  /api/health:
+    get:
+      operationId: health
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/public/bookings:
+    post:
+      operationId: createPublicBooking
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+  /api/public/bookings/{id}:
+    get:
+      operationId: getPublicBooking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingConfirmationResponse'
+  /api/public/event-types:
+    get:
+      operationId: listPublicEventTypes
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTypesResponse'
+  /api/public/event-types/{eventTypeId}/slots:
+    get:
+      operationId: listPublicSlots
+      parameters:
+        - name: eventTypeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: includeStatus
+          in: query
+          required: false
+          schema:
+            type: boolean
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotsResponse'
+  /api/public/owner:
+    get:
+      operationId: getPublicOwner
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerResponse'
+components:
+  schemas:
+    ApiErrorBody:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items: {}
+          required:
+            - code
+            - message
+    Booking:
+      type: object
+      required:
+        - id
+        - eventTypeId
+        - eventType
+        - guestName
+        - guestEmail
+        - startAt
+        - endAt
+        - status
+      properties:
+        id:
+          type: string
+        eventTypeId:
+          type: string
+        eventType:
+          $ref: '#/components/schemas/EventType'
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        guestNotes:
+          type: string
+          nullable: true
+        startAt:
+          type: string
+        endAt:
+          type: string
+        status:
+          $ref: '#/components/schemas/BookingStatus'
+        createdAt:
+          type: string
+        cancelledAt:
+          type: string
+          nullable: true
+    BookingConfirmationResponse:
+      type: object
+      required:
+        - booking
+        - owner
+      properties:
+        booking:
+          $ref: '#/components/schemas/Booking'
+        owner:
+          $ref: '#/components/schemas/Owner'
+    BookingResponse:
+      type: object
+      required:
+        - booking
+      properties:
+        booking:
+          $ref: '#/components/schemas/Booking'
+    BookingStatus:
+      type: string
+      enum:
+        - confirmed
+        - cancelled
+    CreateBookingRequest:
+      type: object
+      required:
+        - eventTypeId
+        - startAt
+        - guestName
+        - guestEmail
+      properties:
+        eventTypeId:
+          type: string
+        startAt:
+          type: string
+        guestName:
+          type: string
+        guestEmail:
+          type: string
+        guestNotes:
+          type: string
+    CreateEventTypeRequest:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - durationMinutes
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+    CreatedEventTypeResponse:
+      type: object
+      required:
+        - eventType
+      properties:
+        eventType:
+          $ref: '#/components/schemas/EventType'
+    EventType:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - durationMinutes
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+    EventTypesResponse:
+      type: object
+      required:
+        - eventTypes
+      properties:
+        eventTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    Owner:
+      type: object
+      required:
+        - ownerName
+        - ownerTitle
+        - ownerBio
+        - timezone
+      properties:
+        ownerName:
+          type: string
+        ownerTitle:
+          type: string
+        ownerBio:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+        timezone:
+          type: string
+    OwnerResponse:
+      type: object
+      required:
+        - owner
+      properties:
+        owner:
+          $ref: '#/components/schemas/Owner'
+    Slot:
+      type: object
+      required:
+        - startAt
+        - endAt
+      properties:
+        startAt:
+          type: string
+        endAt:
+          type: string
+        status:
+          $ref: '#/components/schemas/SlotStatus'
+    SlotStatus:
+      type: string
+      enum:
+        - available
+        - booked
+    SlotsResponse:
+      type: object
+      required:
+        - slots
+      properties:
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Slot'
+servers:
+  - url: http://127.0.0.1:3000
+    description: Local development server
+    variables: {}
+  - url: https://your-domain.example
+    description: Production server
+    variables: {}

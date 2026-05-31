@@ -13,7 +13,7 @@ export type AppConfig = {
 export const getConfig = (): AppConfig => {
   const nodeEnv = process.env.NODE_ENV || "development";
   const isProduction = nodeEnv === "production";
-  const port = Number(process.env.APP_PORT || 3000);
+  const port = Number(process.env.PORT || process.env.APP_PORT || 3000);
 
   return {
     adminEmail: process.env.ADMIN_EMAIL || (isProduction ? "" : "admin@example.com"),

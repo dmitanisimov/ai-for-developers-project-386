@@ -1,36 +1,40 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, getErrorMessage } from "../../api/client";
-import type { Profile, Slot } from "../../api/types";
+import type { EventType, Owner, Slot } from "../../api/types";
 import { SiteHeader } from "../../components/SiteHeader";
-import { getMonthRange, toDateKey, today } from "../../lib/date";
+import { toDateKey, today } from "../../lib/date";
 import { navigate } from "../../lib/router";
 import { BookingTimeStep } from "./BookingTimeStep";
 import { EventTypeStep } from "./EventTypeStep";
 
 export const BookingPage = () => {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [owner, setOwner] = useState<Owner | null>(null);
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [monthSlotCounts, setMonthSlotCounts] = useState<Record<string, number>>({});
   const [selectedDate, setSelectedDate] = useState(today());
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<15 | 30 | null>(null);
+  const [selectedEventType, setSelectedEventType] = useState<EventType | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [guestNotes, setGuestNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const selectedMonth = selectedDate.slice(0, 7);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError("");
+    setAllSlots([]);
+    setSlots([]);
+    setMonthSlotCounts({});
 
-    api
-      .getProfile()
-      .then((profileResponse) => {
+    Promise.all([api.getOwner(), api.getEventTypes()])
+      .then(([ownerResponse, eventTypesResponse]) => {
         if (!active) return;
-        setProfile(profileResponse.profile);
+        setOwner(ownerResponse.owner);
+        setEventTypes(eventTypesResponse.eventTypes);
       })
       .catch((requestError: unknown) => active && setError(getErrorMessage(requestError)))
       .finally(() => active && setLoading(false));
@@ -41,65 +45,47 @@ export const BookingPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedDuration) return;
-
-    let active = true;
-    const monthRange = getMonthRange(selectedDate);
-
-    api
-      .getSlots(monthRange.from, monthRange.to, selectedDuration, true)
-      .then((slotsResponse) => {
-        if (!active) return;
-
-        const counts = slotsResponse.slots.reduce<Record<string, number>>((accumulator, slot) => {
-          if (slot.status !== "available") return accumulator;
-
-          const dateKey = toDateKey(new Date(slot.startAt));
-          accumulator[dateKey] = (accumulator[dateKey] || 0) + 1;
-          return accumulator;
-        }, {});
-
-        setMonthSlotCounts(counts);
-      })
-      .catch(() => active && setMonthSlotCounts({}));
-
-    return () => {
-      active = false;
-    };
-  }, [selectedMonth, selectedDuration]);
-
-  useEffect(() => {
-    if (!selectedDuration) return;
+    if (!selectedEventType) return;
 
     let active = true;
     setLoading(true);
     setError("");
 
     api
-      .getSlots(selectedDate, selectedDate, selectedDuration, true)
-      .then((slotsResponse) => {
-        if (!active) return;
-        setSlots(slotsResponse.slots);
-        setSelectedSlot(null);
-      })
+      .getEventTypeSlots(selectedEventType.id, true)
+      .then((slotsResponse) => active && setAllSlots(slotsResponse.slots))
       .catch((requestError: unknown) => active && setError(getErrorMessage(requestError)))
       .finally(() => active && setLoading(false));
 
     return () => {
       active = false;
     };
-  }, [selectedDate, selectedDuration]);
+  }, [selectedEventType]);
+
+  useEffect(() => {
+    const counts = allSlots.reduce<Record<string, number>>((accumulator, slot) => {
+      if (slot.status !== "available") return accumulator;
+
+      const dateKey = toDateKey(new Date(slot.startAt));
+      accumulator[dateKey] = (accumulator[dateKey] || 0) + 1;
+      return accumulator;
+    }, {});
+
+    setMonthSlotCounts(counts);
+    setSlots(allSlots.filter((slot) => toDateKey(new Date(slot.startAt)) === selectedDate));
+    setSelectedSlot(null);
+  }, [allSlots, selectedDate]);
 
   const submitBooking = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedDuration || !selectedSlot) {
+    if (!selectedEventType || !selectedSlot) {
       setError("Выберите слот");
       return;
     }
 
     try {
       setError("");
-      const response = await api.createBooking({ durationMinutes: selectedDuration, guestName, guestEmail, guestNotes, startAt: selectedSlot.startAt });
+      const response = await api.createBooking({ eventTypeId: selectedEventType.id, guestName, guestEmail, guestNotes, startAt: selectedSlot.startAt });
       navigate(`/success/${response.booking.id}`);
     } catch (requestError) {
       setError(getErrorMessage(requestError));
@@ -110,12 +96,13 @@ export const BookingPage = () => {
     <main className="booking-page">
       <SiteHeader
         onBookClick={() => {
-          setSelectedDuration(null);
+          setSelectedEventType(null);
           setSelectedSlot(null);
+          setAllSlots([]);
         }}
       />
-      {!selectedDuration ? (
-        <EventTypeStep error={error} profile={profile} onSelectDuration={setSelectedDuration} />
+      {!selectedEventType ? (
+        <EventTypeStep error={error} eventTypes={eventTypes} owner={owner} onSelectEventType={setSelectedEventType} />
       ) : (
         <BookingTimeStep
           error={error}
@@ -128,15 +115,15 @@ export const BookingPage = () => {
             if (selectedSlot) {
               setSelectedSlot(null);
             } else {
-              setSelectedDuration(null);
+              setSelectedEventType(null);
             }
           }}
           onSelectDate={setSelectedDate}
           onSelectSlot={setSelectedSlot}
           onSubmit={submitBooking}
-          profile={profile}
+          owner={owner}
           selectedDate={selectedDate}
-          selectedDuration={selectedDuration}
+          selectedEventType={selectedEventType}
           selectedSlot={selectedSlot}
           setGuestEmail={setGuestEmail}
           setGuestName={setGuestName}

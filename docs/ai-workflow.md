@@ -9,7 +9,8 @@
 - `.opencode/agents/*.md` определяет специализированных markdown-агентов.
 - `.opencode/skills/*/SKILL.md` определяет переиспользуемые workflows.
 - `docs/architecture.md` фиксирует архитектурные решения.
-- `docs/api-contract.md` фиксирует контракт между client и server.
+- `typespec/main.tsp` фиксирует контракт между client и server.
+- `docs/openapi.yaml` генерируется из TypeSpec и не редактируется вручную.
 
 ## Роли Агентов
 
@@ -79,6 +80,6 @@ docker compose up -d --build
 
 ## Рабочее Правило
 
-Когда появляется новая feature, сначала определить, меняется ли `docs/api-contract.md`. Если меняется, обновить contract до реализации или в том же patch.
+Когда появляется новая feature, сначала определить, меняется ли `typespec/main.tsp`. Если меняется, обновить TypeSpec и сгенерировать OpenAPI до реализации или в том же patch.
 
 После изменения `opencode.json`, `.opencode/agents` или `.opencode/skills` нужно перезапустить opencode, чтобы текущая сессия загрузила новые файлы.

@@ -9,6 +9,21 @@ export type Profile = {
   timezone: string;
 };
 
+export type Owner = {
+  avatarUrl: string | null;
+  ownerBio: string;
+  ownerName: string;
+  ownerTitle: string;
+  timezone: string;
+};
+
+export type EventType = {
+  description: string;
+  durationMinutes: number;
+  id: string;
+  title: string;
+};
+
 export type Slot = {
   endAt: string;
   startAt: string;
@@ -19,6 +34,8 @@ export type Booking = {
   cancelledAt?: string | null;
   createdAt?: string;
   endAt: string;
+  eventType: EventType;
+  eventTypeId: string;
   guestEmail: string;
   guestName: string;
   guestNotes: string | null;

@@ -27,6 +27,7 @@ export const AdminShell = ({ children }: { children: ReactNode }) => {
       <nav className="admin-nav">
         <strong>Cal Booking</strong>
         <Link to="/admin">Встречи</Link>
+        <Link to="/admin/event-types">Типы событий</Link>
         <Link to="/admin/availability">Доступность</Link>
         <Link to="/admin/profile">Профиль</Link>
         <button className="ghost-button" type="button" onClick={logout}>

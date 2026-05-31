@@ -5,11 +5,12 @@
 ## Что Умеет Приложение
 
 - Публичная страница записи.
-- Выбор встречи на 15 или 30 минут.
+- Выбор типа события, загруженного из API.
 - Просмотр свободных и занятых слотов.
 - Создание бронирования гостем без авторизации.
 - Вход администратора по email и паролю.
 - Просмотр и отмена встреч в админке.
+- Создание типов событий в админке.
 - Настройка доступности владельца календаря.
 - Настройка публичного профиля.
 
@@ -17,7 +18,7 @@
 
 Проект следует Design First подходу:
 
-1. Сначала фиксируется API-контракт в `docs/api-contract.md`.
+1. Сначала фиксируется API-контракт в `typespec/main.tsp`.
 2. Frontend и backend реализуются отдельно по контракту.
 3. Tests проверяют критические сценарии и соответствие реализации контракту.
 4. Docker image собирает приложение в один production-like runtime.
@@ -48,7 +49,9 @@ docs       # architecture, API contract, workflow notes
 
 ## Документация
 
-- `docs/api-contract.md` — контракт API.
+- `typespec/main.tsp` — канонический TypeSpec API-контракт.
+- `docs/openapi.yaml` — OpenAPI, сгенерированный из TypeSpec.
+- `docs/api-contract.md` — человекочитаемая сводка API.
 - `docs/architecture.md` — архитектура и границы MVP.
 - `docs/assignment-adaptation.md` — как проект адаптирует учебное задание.
 - `docs/cal-com-research.md` — наблюдения по Cal.com и предметной области.
@@ -67,6 +70,12 @@ npm install
 
 ```bash
 npm run typecheck
+```
+
+Сгенерировать OpenAPI из TypeSpec:
+
+```bash
+npm run spec:emit
 ```
 
 Запустить API tests:
@@ -119,7 +128,7 @@ npx playwright install chromium
 npx playwright install-deps chromium
 ```
 
-`npm run e2e` собирает `apps/web` и `apps/api`, стартует NestJS на временной SQLite базе и проверяет основной booking/admin flow.
+`npm run e2e` собирает `apps/web` и `apps/api`, стартует NestJS на временной SQLite базе и проверяет основной booking/admin flow: выбор типа события, создание бронирования, просмотр в админке, отмену и повторную доступность слота.
 
 ## Docker
 
@@ -132,10 +141,13 @@ cp .env.example .env
 Для production-like запуска задай собственные значения:
 
 ```env
+PORT=3000
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=change-me-to-a-long-password
 SESSION_SECRET=change-me-to-a-long-random-secret
 ```
+
+Контейнер читает стандартную переменную `PORT`. `APP_PORT` оставлен только как fallback для локальной совместимости.
 
 Собрать и запустить контейнер без публикации host-порта:
 
@@ -165,7 +177,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 ```env
 APP_HOST=localhost
-APP_PORT=3000
+PORT=3000
 NODE_ENV=production
 DATABASE_URL=file:/app/data/cal-booking.sqlite
 ADMIN_EMAIL=admin@example.com
@@ -175,6 +187,24 @@ SESSION_COOKIE_NAME=cal_booking_session
 ```
 
 SQLite база в Docker хранится в volume `cal-booking-data` и монтируется в `/app/data`.
+
+## Deploy
+
+Целевая площадка деплоя: Render Web Service с Docker runtime. В репозитории есть `render.yaml` для Blueprint deploy.
+
+Render должен запускать образ из `Dockerfile` и передавать `PORT`. Обязательные production env values:
+
+```env
+NODE_ENV=production
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-me-to-a-long-password
+SESSION_SECRET=change-me-to-a-long-random-secret
+DATABASE_URL=file:/app/data/cal-booking.sqlite
+```
+
+Публичная ссылка будет добавлена после создания Render service.
+
+На бесплатном Render plan SQLite-файл будет храниться в ephemeral filesystem. Для устойчивого production-хранения добавь Render Disk с mount path `/app/data`.
 
 ## Healthcheck
 
@@ -192,6 +222,7 @@ GET /api/health
 
 ```bash
 npm run typecheck
+npm run spec:emit
 npm test
 npm run build
 npm audit --omit=dev

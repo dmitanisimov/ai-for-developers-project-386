@@ -21,7 +21,7 @@ export const createTestApp = async (prefix: string): Promise<TestApp> => {
   process.env.ADMIN_EMAIL = "admin@example.com";
   process.env.ADMIN_PASSWORD = "local-dev-password";
   process.env.APP_HOST = "localhost";
-  process.env.APP_PORT = "3000";
+  process.env.PORT = "3000";
   process.env.DATABASE_URL = `file:${join(tempDir, "test.sqlite")}`;
   process.env.NODE_ENV = "test";
   process.env.SESSION_COOKIE_NAME = "cal_booking_session";

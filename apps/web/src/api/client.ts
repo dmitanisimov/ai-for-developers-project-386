@@ -1,4 +1,4 @@
-import type { AvailabilityRule, Booking, Profile, Slot } from "./types";
+import type { AvailabilityRule, Booking, EventType, Owner, Profile, Slot } from "./types";
 
 type ApiErrorPayload = {
   error?: {
@@ -41,13 +41,17 @@ const request = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
 };
 
 type CurrentUserResponse = { user: { email: string } };
+type OwnerResponse = { owner: Owner };
 type PublicProfileResponse = { profile: Profile };
+type EventTypesResponse = { eventTypes: EventType[] };
 type AdminProfileResponse = { profile: Profile };
 type AvailabilityResponse = { availability: AvailabilityRule[] };
 type AdminBookingsResponse = { bookings: Booking[] };
 
 let currentUserCache: CurrentUserResponse | null = null;
+let ownerCache: OwnerResponse | null = null;
 let publicProfileCache: PublicProfileResponse | null = null;
+let eventTypesCache: EventTypesResponse | null = null;
 let adminProfileCache: AdminProfileResponse | null = null;
 let availabilityCache: AvailabilityResponse | null = null;
 const adminBookingsCache = new Map<string, AdminBookingsResponse>();
@@ -65,11 +69,22 @@ export const api = {
     publicProfileCache = await request<PublicProfileResponse>("/api/public/profile");
     return publicProfileCache;
   },
+  getOwner: async () => {
+    if (ownerCache) return ownerCache;
+    ownerCache = await request<OwnerResponse>("/api/public/owner");
+    return ownerCache;
+  },
+  getEventTypes: async () => {
+    if (eventTypesCache) return eventTypesCache;
+    eventTypesCache = await request<EventTypesResponse>("/api/public/event-types");
+    return eventTypesCache;
+  },
+  getEventTypeSlots: (eventTypeId: string, includeStatus = false) => request<{ slots: Slot[] }>(`/api/public/event-types/${eventTypeId}/slots${includeStatus ? "?includeStatus=true" : ""}`),
   getSlots: (from: string, to: string, durationMinutes?: number, includeStatus = false) =>
     request<{ slots: Slot[] }>(`/api/public/slots?from=${from}&to=${to}${durationMinutes ? `&durationMinutes=${durationMinutes}` : ""}${includeStatus ? "&includeStatus=true" : ""}`),
-  createBooking: (payload: { durationMinutes?: number; guestEmail: string; guestName: string; guestNotes?: string; startAt: string }) =>
+  createBooking: (payload: { eventTypeId: string; guestEmail: string; guestName: string; guestNotes?: string; startAt: string }) =>
     request<{ booking: Booking }>("/api/public/bookings", { method: "POST", body: JSON.stringify(payload) }),
-  getBooking: (id: string) => request<{ booking: Booking; profile: Pick<Profile, "meetingDurationMinutes" | "meetingTitle" | "ownerName" | "timezone"> }>(`/api/public/bookings/${id}`),
+  getBooking: (id: string) => request<{ booking: Booking; owner: Owner }>(`/api/public/bookings/${id}`),
 
   login: async (payload: { email: string; password: string; rememberMe?: boolean }) => {
     currentUserCache = await request<CurrentUserResponse>("/api/auth/login", { method: "POST", body: JSON.stringify(payload) });
@@ -94,6 +109,16 @@ export const api = {
     adminBookingsCache.set(status, response);
     return response;
   },
+  getAdminEventTypes: async () => {
+    if (eventTypesCache) return eventTypesCache;
+    eventTypesCache = await request<EventTypesResponse>("/api/admin/event-types");
+    return eventTypesCache;
+  },
+  createAdminEventType: async (payload: EventType) => {
+    const response = await request<{ eventType: EventType }>("/api/admin/event-types", { method: "POST", body: JSON.stringify(payload) });
+    eventTypesCache = null;
+    return response;
+  },
   cancelBooking: async (id: string) => {
     const response = await request<{ booking: Pick<Booking, "cancelledAt" | "id" | "status"> }>(`/api/admin/bookings/${id}/cancel`, { method: "PATCH" });
     adminBookingsCache.clear();
@@ -116,6 +141,7 @@ export const api = {
   updateProfile: async (profile: Profile) => {
     adminProfileCache = await request<AdminProfileResponse>("/api/admin/profile", { method: "PUT", body: JSON.stringify(profile) });
     publicProfileCache = adminProfileCache;
+    ownerCache = null;
     return adminProfileCache;
   },
 };

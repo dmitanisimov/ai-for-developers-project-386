@@ -44,25 +44,47 @@ describe("admin API", () => {
 
     try {
       const cookie = await login(app);
-      const monday = nextFutureMonday();
-      const slotsResponse = await request(app.getHttpServer()).get(`/api/public/slots?from=${monday}&to=${monday}`).set("host", "127.0.0.1:3000");
+      const slotsResponse = await request(app.getHttpServer()).get("/api/public/event-types/intro-30/slots").set("host", "127.0.0.1:3000");
       const startAt = slotsResponse.body.slots[0].startAt;
 
-      const bookingResponse = await request(app.getHttpServer()).post("/api/public/bookings").set("host", "127.0.0.1:3000").send({ startAt, guestName: "Мария Петрова", guestEmail: "maria@example.com" });
+      const bookingResponse = await request(app.getHttpServer()).post("/api/public/bookings").set("host", "127.0.0.1:3000").send({ eventTypeId: "intro-30", startAt, guestName: "Мария Петрова", guestEmail: "maria@example.com" });
       const bookingId = bookingResponse.body.booking.id;
 
       const listResponse = await request(app.getHttpServer()).get("/api/admin/bookings?status=upcoming").set("host", "127.0.0.1:3000").set("cookie", cookie);
 
       expect(listResponse.status).toBe(200);
-      expect(listResponse.body.bookings).toContainEqual(expect.objectContaining({ id: bookingId, guestEmail: "maria@example.com", status: "confirmed" }));
+      expect(listResponse.body.bookings).toContainEqual(expect.objectContaining({ id: bookingId, eventTypeId: "intro-30", guestEmail: "maria@example.com", status: "confirmed" }));
 
       const cancelResponse = await request(app.getHttpServer()).patch(`/api/admin/bookings/${bookingId}/cancel`).set("host", "127.0.0.1:3000").set("cookie", cookie);
 
       expect(cancelResponse.status).toBe(200);
       expect(cancelResponse.body.booking).toMatchObject({ id: bookingId, status: "cancelled" });
 
-      const updatedSlotsResponse = await request(app.getHttpServer()).get(`/api/public/slots?from=${monday}&to=${monday}`).set("host", "127.0.0.1:3000");
+      const updatedSlotsResponse = await request(app.getHttpServer()).get("/api/public/event-types/intro-30/slots").set("host", "127.0.0.1:3000");
       expect(updatedSlotsResponse.body.slots.map((slot: { startAt: string }) => slot.startAt)).toContain(startAt);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("создает тип события в админке", async () => {
+    const { app, cleanup } = await createTestApp("cal-booking-admin-");
+
+    try {
+      const cookie = await login(app);
+      const payload = {
+        id: "deep-dive-45",
+        title: "Глубокий разбор",
+        description: "45 минут для подробного разбора задачи.",
+        durationMinutes: 45,
+      };
+
+      const createResponse = await request(app.getHttpServer()).post("/api/admin/event-types").set("host", "127.0.0.1:3000").set("cookie", cookie).send(payload);
+      const listResponse = await request(app.getHttpServer()).get("/api/admin/event-types").set("host", "127.0.0.1:3000").set("cookie", cookie);
+
+      expect(createResponse.status).toBe(201);
+      expect(createResponse.body.eventType).toEqual(payload);
+      expect(listResponse.body.eventTypes).toContainEqual(payload);
     } finally {
       await cleanup();
     }

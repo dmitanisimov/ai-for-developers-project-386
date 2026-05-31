@@ -15,6 +15,7 @@ services:
       - no-new-privileges:true
     environment:
       APP_HOST: ${APP_HOST:-localhost}
+      PORT: ${PORT:-3000}
       APP_PORT: ${APP_PORT:-3000}
       NODE_ENV: ${NODE_ENV:-production}
       DATABASE_URL: ${DATABASE_URL:-file:/app/data/cal-booking.sqlite}
@@ -25,14 +26,14 @@ services:
     volumes:
       - cal-booking-data:/app/data
     expose:
-      - "3000"
+      - "${PORT:-3000}"
     healthcheck:
       test:
         - CMD
         - node
         - -e
         - >-
-          fetch("http://127.0.0.1:3000/api/health")
+          fetch("http://127.0.0.1:" + (process.env.PORT || 3000) + "/api/health")
             .then(async (r) => {
               const j = await r.json();
               process.exit(r.ok && j.status === "ok" ? 0 : 1);

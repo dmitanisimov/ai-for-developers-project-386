@@ -12,9 +12,9 @@ permission:
 
 Задачи:
 
-- поддерживать `docs/architecture.md` и `docs/api-contract.md`;
+- поддерживать `typespec/main.tsp`, `docs/openapi.yaml`, `docs/architecture.md` и `docs/api-contract.md`;
 - определять, меняет ли запрос API contract;
-- не допускать scope creep за пределы одного владельца и текущих 15/30-минутных meeting categories без явного подтверждения;
+- не допускать scope creep за пределы одного владельца, типов событий MVP и admin extension без явного подтверждения;
 - сохранять правило, что доступные слоты вычисляет сервер;
 - проектировать NestJS modules, auth guards и admin routes до реализации;
 - кратко и ясно документировать tradeoffs.

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import type { AppConfig } from "../config/app.config";
 import type { DatabaseService } from "./database.service";
-import { adminUsers, availabilityRules, calendarProfile } from "./schema";
+import { adminUsers, availabilityRules, calendarProfile, eventTypes } from "./schema";
 
 const nowIso = () => new Date().toISOString();
 
@@ -58,6 +58,33 @@ export const seedDatabase = async ({ db }: DatabaseService, config: AppConfig) =
         updatedAt: currentTime,
       })
       .run();
+  }
+
+  for (const eventType of [
+    {
+      id: "intro-15",
+      title: "Короткая консультация",
+      description: "15 минут, чтобы быстро обсудить вопрос и договориться о следующих шагах.",
+      durationMinutes: 15,
+    },
+    {
+      id: "intro-30",
+      title: "Ознакомительный звонок",
+      description: "30 минут, чтобы подробно обсудить проект, контекст и формат работы.",
+      durationMinutes: 30,
+    },
+  ]) {
+    const existingEventType = db.select().from(eventTypes).where(eq(eventTypes.id, eventType.id)).get();
+
+    if (!existingEventType) {
+      db.insert(eventTypes)
+        .values({
+          ...eventType,
+          createdAt: currentTime,
+          updatedAt: currentTime,
+        })
+        .run();
+    }
   }
 
   for (const weekday of [1, 2, 3, 4, 5, 6, 7]) {

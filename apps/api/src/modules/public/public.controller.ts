@@ -12,6 +12,21 @@ export class PublicController {
     return this.publicService.getProfile();
   }
 
+  @Get("owner")
+  getOwner() {
+    return this.publicService.getOwner();
+  }
+
+  @Get("event-types")
+  getEventTypes() {
+    return this.publicService.getEventTypes();
+  }
+
+  @Get("event-types/:eventTypeId/slots")
+  getEventTypeSlots(@Param("eventTypeId") eventTypeId: string, @Query("includeStatus") includeStatus?: string) {
+    return this.publicService.getEventTypeSlots(eventTypeId, includeStatus);
+  }
+
   @Get("slots")
   getSlots(@Query() query: ListSlotsQuery) {
     return this.publicService.getSlots(query);

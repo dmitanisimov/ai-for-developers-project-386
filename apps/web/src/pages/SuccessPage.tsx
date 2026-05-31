@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, getErrorMessage } from "../api/client";
-import type { Booking, Profile } from "../api/types";
+import type { Booking, Owner } from "../api/types";
 import { Link } from "../components/Link";
 import { formatDateTime } from "../lib/date";
 
 export const SuccessPage = ({ bookingId }: { bookingId: string }) => {
-  const [data, setData] = useState<{ booking: Booking; profile: Pick<Profile, "meetingDurationMinutes" | "meetingTitle" | "ownerName" | "timezone"> } | null>(null);
+  const [data, setData] = useState<{ booking: Booking; owner: Owner } | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -23,9 +23,10 @@ export const SuccessPage = ({ bookingId }: { bookingId: string }) => {
         {error ? <p className="error-box">{error}</p> : null}
         {data ? (
           <div className="detail-list">
-            <span>{data.profile.meetingTitle}</span>
+            <span>{data.booking.eventType.title}</span>
             <span>{formatDateTime(data.booking.startAt)}</span>
             <span>{data.booking.guestEmail}</span>
+            <span>{data.owner.ownerName}</span>
           </div>
         ) : null}
         <Link className="primary-link" to="/book">

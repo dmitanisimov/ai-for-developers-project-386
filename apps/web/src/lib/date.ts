@@ -15,6 +15,12 @@ export const parseDateKey = (value: string) => {
 
 export const today = () => toDateKey(new Date());
 
+export const bookingWindowEnd = () => {
+  const end = new Date();
+  end.setDate(end.getDate() + 13);
+  return toDateKey(end);
+};
+
 export const formatDateTime = (value: string) =>
   new Intl.DateTimeFormat("ru-RU", {
     dateStyle: "medium",

@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import type { Profile, Slot } from "../../api/types";
+import type { EventType, Owner, Slot } from "../../api/types";
 import { BookingInfoCard } from "./BookingInfoCard";
 import { CalendarGrid } from "./CalendarGrid";
 import { SlotStatusPanel } from "./SlotStatusPanel";
@@ -15,9 +15,9 @@ type BookingTimeStepProps = {
   onSelectDate: (date: string) => void;
   onSelectSlot: (slot: Slot) => void;
   onSubmit: (event: FormEvent) => void;
-  profile: Profile | null;
+  owner: Owner | null;
   selectedDate: string;
-  selectedDuration: 15 | 30;
+  selectedEventType: EventType;
   selectedSlot: Slot | null;
   setGuestEmail: (value: string) => void;
   setGuestName: (value: string) => void;
@@ -28,11 +28,11 @@ type BookingTimeStepProps = {
 export const BookingTimeStep = (props: BookingTimeStepProps) => (
   <section className="booking-step-page" aria-labelledby="booking-title">
     <h1 id="booking-title" className="booking-step-title">
-      Встреча {props.selectedDuration} минут
+      {props.selectedEventType.title}
     </h1>
 
     <div className="booking-step-grid">
-      <BookingInfoCard profile={props.profile} selectedDate={props.selectedDate} selectedDuration={props.selectedDuration} selectedSlot={props.selectedSlot} />
+      <BookingInfoCard owner={props.owner} selectedDate={props.selectedDate} selectedEventType={props.selectedEventType} selectedSlot={props.selectedSlot} />
       <CalendarGrid monthSlotCounts={props.monthSlotCounts} selectedDate={props.selectedDate} onSelectDate={props.onSelectDate} />
       <SlotStatusPanel {...props} />
     </div>

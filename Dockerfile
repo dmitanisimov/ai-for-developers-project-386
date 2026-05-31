@@ -32,7 +32,7 @@ FROM base AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV APP_PORT=3000
+ENV PORT=3000
 
 COPY --from=prod-deps /app/package*.json ./
 COPY --from=prod-deps /app/apps/api/package.json ./apps/api/package.json

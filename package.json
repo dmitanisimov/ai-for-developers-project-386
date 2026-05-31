@@ -12,12 +12,16 @@
     "dev:web": "npm run dev -w apps/web",
     "build": "npm run build -w apps/web && npm run build -w apps/api",
     "e2e": "npm run e2e -w apps/web",
+    "spec:emit": "tsp compile typespec",
     "start": "npm run start -w apps/api",
     "test": "npm run test -w apps/api",
     "typecheck": "npm run typecheck -ws"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "@typespec/compiler": "^1.11.0",
+    "@typespec/http": "^1.11.0",
+    "@typespec/openapi3": "^1.11.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
