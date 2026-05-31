@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.git
+.opencode
+data
+dist
+apps/*/dist
+node_modules
+npm-debug.log
+playwright-report
+test-results
+apps/*/test-results
+*.log

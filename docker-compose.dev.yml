@@ -1,0 +1,15 @@
+services:
+  cal-booking-app:
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: ${DATABASE_URL:-file:/app/data/cal-booking.sqlite}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-local-dev-password}
+      SESSION_SECRET: ${SESSION_SECRET:-local-dev-session-secret}
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+
+    # Override только для разработки.
+    # Публикует приложение только на localhost для ручной проверки:
+    # http://127.0.0.1:3000
+    # Не использовать этот файл для публичного production-доступа.
