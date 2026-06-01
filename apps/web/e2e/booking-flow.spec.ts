@@ -29,6 +29,7 @@ test("visitor books a slot and admin cancels it", async ({ page }) => {
   await page.getByRole("button", { name: "Войти" }).click();
 
   await expect(page.getByRole("heading", { name: "Встречи" })).toBeVisible({ timeout: 10_000 });
+  await page.getByRole("combobox").selectOption("all");
   const bookingRow = page.locator(".table-row").filter({ hasText: "e2e@example.com" });
   await expect(bookingRow).toContainText("E2E Visitor");
   await expect(bookingRow).toContainText("Короткая консультация");
