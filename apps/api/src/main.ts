@@ -11,7 +11,7 @@ import { securityMiddleware } from "./common/security.middleware";
 import { getConfig } from "./config/app.config";
 import { AppModule } from "./app.module";
 
-const clientDistDir = join(process.cwd(), "apps/web/dist");
+const clientDistDir = [join(process.cwd(), "apps/web/dist"), join(process.cwd(), "../web/dist")].find((pathName) => existsSync(pathName)) ?? join(process.cwd(), "apps/web/dist");
 
 const bootstrap = async () => {
   const config = getConfig();
