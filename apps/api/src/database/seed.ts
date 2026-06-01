@@ -7,9 +7,15 @@ import { adminUsers, availabilityRules, calendarProfile, eventTypes } from "./sc
 
 const nowIso = () => new Date().toISOString();
 
-const assertSeedConfig = (config: AppConfig) => {
+const shouldSeedAdmin = (config: AppConfig) => Boolean(config.adminEmail || config.adminPassword);
+
+const assertAdminSeedConfig = (config: AppConfig) => {
+  if (!shouldSeedAdmin(config)) {
+    return false;
+  }
+
   if (!config.adminEmail || !config.adminPassword) {
-    throw new Error("ADMIN_EMAIL и ADMIN_PASSWORD обязательны для seed администратора");
+    throw new Error("ADMIN_EMAIL и ADMIN_PASSWORD должны быть заданы вместе для seed администратора");
   }
 
   if (config.nodeEnv === "production" && config.adminPassword.length < 12) {
@@ -19,15 +25,17 @@ const assertSeedConfig = (config: AppConfig) => {
   if (config.nodeEnv === "production" && !config.sessionSecret) {
     throw new Error("SESSION_SECRET обязателен в production");
   }
+
+  return true;
 };
 
 export const seedDatabase = async ({ db }: DatabaseService, config: AppConfig) => {
-  assertSeedConfig(config);
+  const seedAdmin = assertAdminSeedConfig(config);
 
   const currentTime = nowIso();
   const existingAdmin = db.select().from(adminUsers).limit(1).get();
 
-  if (!existingAdmin) {
+  if (seedAdmin && !existingAdmin) {
     const passwordHash = await argon2.hash(config.adminPassword);
 
     db.insert(adminUsers)
