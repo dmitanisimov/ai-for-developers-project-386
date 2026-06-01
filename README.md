@@ -205,7 +205,11 @@ DATABASE_URL=file:/app/data/cal-booking.sqlite
 # Optional: APP_HOST=your-app.onrender.com
 ```
 
-Публичная ссылка будет добавлена после создания Render service.
+Публичная версия:
+
+```txt
+https://ai-for-developers-project-386-563o.onrender.com/
+```
 
 На бесплатном Render plan SQLite-файл будет храниться в ephemeral filesystem. Для устойчивого production-хранения добавь Render Disk с mount path `/app/data`.
 
