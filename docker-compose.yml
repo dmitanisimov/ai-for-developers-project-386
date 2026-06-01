@@ -14,7 +14,7 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-      APP_HOST: ${APP_HOST:-localhost}
+      APP_HOST: ${APP_HOST:-}
       PORT: ${PORT:-3000}
       APP_PORT: ${APP_PORT:-3000}
       NODE_ENV: ${NODE_ENV:-production}

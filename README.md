@@ -176,7 +176,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml down
 ## Environment Variables
 
 ```env
-APP_HOST=localhost
+APP_HOST=
 PORT=3000
 NODE_ENV=production
 DATABASE_URL=file:/app/data/cal-booking.sqlite
@@ -187,6 +187,8 @@ SESSION_COOKIE_NAME=cal_booking_session
 ```
 
 SQLite база в Docker хранится в volume `cal-booking-data` и монтируется в `/app/data`.
+
+`APP_HOST` опционален. Если он пустой, приложение не блокирует запросы по Host header. Если задан, значение используется как allowlist публичных hosts, можно указать несколько через запятую.
 
 ## Deploy
 
@@ -200,6 +202,7 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=change-me-to-a-long-password
 SESSION_SECRET=change-me-to-a-long-random-secret
 DATABASE_URL=file:/app/data/cal-booking.sqlite
+# Optional: APP_HOST=your-app.onrender.com
 ```
 
 Публичная ссылка будет добавлена после создания Render service.

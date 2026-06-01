@@ -18,7 +18,7 @@ export const getConfig = (): AppConfig => {
   return {
     adminEmail: process.env.ADMIN_EMAIL || (isProduction ? "" : "admin@example.com"),
     adminPassword: process.env.ADMIN_PASSWORD || (isProduction ? "" : "local-dev-password"),
-    appHost: process.env.APP_HOST || "localhost",
+    appHost: process.env.APP_HOST?.trim() || "",
     databaseUrl: process.env.DATABASE_URL || "file:./data/cal-booking.sqlite",
     host: "0.0.0.0",
     nodeEnv,
